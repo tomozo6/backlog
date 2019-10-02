@@ -1,0 +1,59 @@
+service: backlog
+provider:
+  name: aws
+  region: ap-northeast-1
+  stage:
+  memorySize: 128
+  runtime: python3.7
+  versionFunctions: false
+  tags:
+    projecjt: ${self:custom.conf.base.project}
+    env: ${opt:stage}
+    role: ${self:service}
+    created_by: ServerlessFramework
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.dynamodb.monthly_work}"
+  environment:
+    api_key: ${self:custom.conf.${opt:stage}.api_key}
+    space_name: ${self:custom.conf.${opt:stage}.space_name}
+    project_key: ${self:custom.conf.${opt:stage}.project_key}
+    dynamo_tbl: ${self:custom.dynamodb.monthly_work}
+
+custom:
+  conf:
+    base: ${file(./conf/base.yml)}
+    prod: ${file(./conf/prod.yml)}
+  dynamodb:
+    monthly_work: ${self:custom.conf.base.project}-${opt:stage}-monthly_work-dynamodb
+
+functions:
+  monthlywork:
+    name: ${self:custom.conf.base.project}-${opt:stage}-${self:service}-lambda
+    handler: main.monthlywork
+    description: Managed by ServerlessFramework
+
+resources:
+  Resources:
+    DynamoDbMonthlyWork:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: No
+            AttributeType: N
+        KeySchema:
+          - AttributeName: No
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.dynamodb.monthly_work}

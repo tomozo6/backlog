@@ -11,9 +11,6 @@ import datetime
 # [第x曜日モード]      dayの値が入っていない場合、nthとdowより日付を算出してyyyy-MM-ddのfmtにして返す
 # [日付指定モード処理] dayの値が入っている場合、単純にyyyy-MM-ddのfmtにして返す
 def get_day_of_nth_dow(day, nth, dow):
-    print('day: {}'.format(day))
-    print('nth: {}'.format(nth))
-    print('dow: {}'.format(dow))
     # 曜日の数値コード変換テーブル
     dow_table = {
         'mon' : 0,
@@ -30,20 +27,19 @@ def get_day_of_nth_dow(day, nth, dow):
     tomonth = int(today.strftime("%m"))
 
     if day == 0: # [第x曜日モード]
-        if nth > 0 and dow > 0:
-            nth = int(nth)               # nthを数値型に変換
-            dow = int(dow_table[dow])    # dowを数値コードに変換
+        if dow in dow_table:
+            nth = int(nth)
+            dow = int(dow_table[dow])
 
-            if nth < 1 or dow < 0 or dow > 6:
-                return None
-
-            first_dow, n = calendar.monthrange(toyear, tomonth)
-            day = 7 * (nth - 1) + (dow - first_dow) % 7 + 1
-            res = datetime.date(toyear, tomonth, day)
-            return res
-
+            if nth > 0:
+                first_dow, n = calendar.monthrange(toyear, tomonth)
+                day = 7 * (nth - 1) + (dow - first_dow) % 7 + 1
+                res = datetime.date(toyear, tomonth, day)
+                return res
+            else:
+                return ''
         else:
-            return None
+            return ''
     else: # [日付指定モード処理]
         day = int(day) # dayを数値型に変換
         res = datetime.date(toyear, tomonth, day)

@@ -5,7 +5,6 @@
 import os
 import json
 import logging
-import pprint
 
 # 自作モジュール
 from backlog  import BackLog
@@ -33,39 +32,18 @@ column_fmt = {
   'milestone_names': 'dummy',
   'summary':         'dummy',
   'description':     'dummy',
-  'assignee_name':   'dummy',
+  'mailaddress':     'dummy',
   'start_day':       0,
   'start_dow_nth':   0,
-  'start_dow_dow':   0,
+  'start_dow_dow':   'dummy',
   'due_day':         0,
   'due_dow_nth':     0,
-  'due_dow_dow':     0
+  'due_dow_dow':     'dummy'
 }
 
 # ------------------------------------------------------------------------------
 # 主処理
 # ------------------------------------------------------------------------------
-# DynamoDBに入れる予定のデータ
-assignee_name   = 't-sasaki'
-category_names  = 'vgj ,kfs'
-milestone_names = '月次作業, AWS保守運用'
-issuetype_name  = '月次'
-summary         = 'test1'
-description     = '''
-test
-テスト
-|てすと|テスト|h
-|1|2|
-|3|4|
-'''
-start_day     = ''
-start_dow_nth = '1'
-start_dow_dow = 'sun'
-due_day       = ''
-due_dow_nth   = '3'
-due_dow_dow   = 'mon'
-
-
 logging.info('start')
 def monthlywork(event, context):
     try:
@@ -104,21 +82,25 @@ def monthlywork(event, context):
             start_date = schedule.get_day_of_nth_dow(
                              int(record.get('start_day')),
                              int(record.get('start_dow_nth')),
-                             int(record.get('start_dow_dow')),
+                             str(record.get('start_dow_dow')),
                          )
             logging.info('start_date: {}'.format(start_date))
 
             due_date = schedule.get_day_of_nth_dow(
                              int(record.get('due_day')),
                              int(record.get('due_dow_nth')),
-                             int(record.get('due_dow_dow')),
+                             str(record.get('due_dow_dow')),
                          )
             logging.info('due_date: {}'.format(due_date))
 
             issuetype_id  = backlog.get_issuetype_id(record.get('issuetype_name'))
-            assignee_id   = backlog.get_user_id(record.get('assignee_name'))
+            logging.info('issuetype_id: {}'.format(issuetype_id))
+            assignee_id   = backlog.get_user_id(record.get('mailaddress'))
+            logging.info('assignee_id: {}'.format(assignee_id))
             category_ids  = [ backlog.get_category_id(i.strip())  for i in record.get('category_names').split(',')  if not record.get('category_names') == '']
+            logging.info('category_ids: {}'.format(category_ids))
             milestone_ids = [ backlog.get_milestone_id(i.strip()) for i in record.get('milestone_names').split(',') if not record.get('milestone_names') == '']
+            logging.info('milestone_ids: {}'.format(milestone_ids))
  
             # 課題登録API実行
             res = backlog.add_issue(
@@ -134,9 +116,9 @@ def monthlywork(event, context):
             )
 
         logging.info('lambda_handler Normal end')
-        return
+        return 'lambda_handler Normal end'
 
     except Exception as error:
         logging.error(error)
         logging.info('lambda_handler Abnormal end')
-        return
+        return 'lambda_handler Abnormal end'

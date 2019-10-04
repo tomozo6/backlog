@@ -4,6 +4,7 @@ provider:
   region: ap-northeast-1
   stage:
   memorySize: 128
+  timeout: 300
   runtime: python3.7
   versionFunctions: false
   tags:
@@ -33,6 +34,7 @@ custom:
   conf:
     base: ${file(./conf/base.yml)}
     prod: ${file(./conf/prod.yml)}
+    dev:  ${file(./conf/dev.yml)}
   dynamodb:
     monthly_work: ${self:custom.conf.base.project}-${opt:stage}-monthly_work-dynamodb
 

@@ -47,8 +47,8 @@ class BackLog:
         res = urllib.request.urlopen(req).read().decode("utf-8")
         return json.loads(res)
     
-    def get_user_id(self, user_name):
-        id = [i['id'] for i in self.users if i['userId'] == user_name][0]
+    def get_user_id(self, mailaddress):
+        id = [i['id'] for i in self.users if i['mailAddress'] == mailaddress][0]
         return id
 
 #----- 種別関連

@@ -93,16 +93,56 @@ def monthlywork(event, context):
                          )
             logging.info('due_date: {}'.format(due_date))
 
-            issuetype_id  = backlog.get_issuetype_id(record.get('issuetype_name'))
-            logging.info('issuetype_id: {}'.format(issuetype_id))
-            assignee_id   = backlog.get_user_id(record.get('mailaddress'))
-            logging.info('assignee_id: {}'.format(assignee_id))
-            category_ids  = [ backlog.get_category_id(i.strip())  for i in record.get('category_names').split(',')  if not record.get('category_names') == '']
-            logging.info('category_ids: {}'.format(category_ids))
-            milestone_ids = [ backlog.get_milestone_id(i.strip()) for i in record.get('milestone_names').split(',') if not record.get('milestone_names') == '']
-            logging.info('milestone_ids: {}'.format(milestone_ids))
+            # ----- Issuetype
+            issuetype_name = record.get('issuetype_name')
+            issuetype_id  = backlog.get_issuetype_id(issuetype_name)
+            logging.info('The {0} IssuetypeID: {1}.'.format(issuetype_name, issuetype_id))
+
+            # ----- Assignee 
+            mailaddress = record.get('mailaddress')
+            assignee_id = backlog.get_user_id(mailaddress)
+            logging.info('The {0} AssigneeId: {1}'.format(mailaddress, assignee_id))
+
+            # ----- Category(複数指定が可能なのでちょっと面倒)
+            # 引っ張ってきたデータをカンマ区切りで配列に詰め、それぞれの要素に対して先頭末尾の空白を削除
+            category_names =  list(map(str.strip, record.get('category_names').split(',')))
+
+            # カテゴリIDリストの作成
+            category_ids = []
+            for category_name in category_names:
+                category_id = backlog.get_category_id(category_name)
+                logging.info('The {0} CategoryID: {1}.'.format(category_name, category_id))
+                #指定されたカテゴリが無ければ作成する
+                if category_id is None:
+                  logging.info('a new category create because The specified category do not define.')
+                  res = backlog.create_category(category_name)
+                  logging.info('create category result: {}'.format(res))
+                  category_id = res.get('id')
+                  logging.info('The {0} CategoryID: {1}.'.format(category_name, category_id))
+                category_ids.append(category_id)
+            logging.info('category_ids: {}.'.format(category_ids))
+
+            # ----- MileStone(複数指定が可能なのでちょっと面倒)
+            # 引っ張ってきたデータをカンマ区切りで配列に詰め、それぞれの要素に対して先頭末尾の空白を削除
+            milestone_names =  list(map(str.strip, record.get('milestone_names').split(',')))
+
+            # マイルストンIDリストの作成
+            milestone_ids = []
+            for milestone_name in milestone_names:
+                milestone_id = backlog.get_milestone_id(milestone_name)
+                logging.info('The {0} milestoneID: {1}.'.format(milestone_name, milestone_id))
+                #指定されたマイルストンが無ければ作成する
+                if milestone_id is None:
+                  logging.info('a new milestone create because The specified milestone do not define.')
+                  res = backlog.create_milestone(milestone_name)
+                  logging.info('create milestone result: {}'.format(res))
+                  milestone_id = res.get('id')
+                  logging.info('The {0} milestoneID: {1}.'.format(milestone_name, milestone_id))
+                milestone_ids.append(milestone_id)
+            logging.info('milestone_ids: {}.'.format(milestone_ids))
  
             # 課題登録API実行
+            logging.info('Execute the issue registration API.')
             res = backlog.add_issue(
                       record.get('summary'),
                       issuetype_id,
@@ -113,12 +153,13 @@ def monthlywork(event, context):
                       category_ids,
                       milestone_ids,
                       []
-            )
+                  )
+            logging.info('Execute the issue registration API Result: {}'.format(res))
 
         logging.info('lambda_handler Normal end')
         return 'lambda_handler Normal end'
 
     except Exception as error:
-        logging.error(error)
         logging.info('lambda_handler Abnormal end')
-        return 'lambda_handler Abnormal end'
+        logging.error(error)
+        raise error

@@ -1,0 +1,9 @@
+*.tfstate.*
+.terraform/
+*.retry
+*.swp
+sshd_config
+.envrc
+*.zip
+__pycache__/
+conf/*

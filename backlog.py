@@ -72,12 +72,33 @@ class BackLog:
         params = {'apiKey': self.api_key}
     
         req = urllib.request.Request('{}?{}'.format(url, urllib.parse.urlencode(params)))
-        res = urllib.request.urlopen(req).read().decode("utf-8")
+        res = urllib.request.urlopen(req).read().decode('utf-8')
+        return json.loads(res)
+
+    def create_category(self, category_name):
+        api     = 'projects/{}/categories'.format(self.project_id)
+        url     = self.base_url.format(api)
+        params  = {'apiKey': self.api_key}
+        headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+        data    = 'name={}'.format(category_name).encode("utf-8")
+        method  = 'POST'
+    
+        req = urllib.request.Request('{}?{}'.format(url, urllib.parse.urlencode(params)),
+                                             data=data,
+                                             headers=headers,
+                                             method=method
+              )
+        res = urllib.request.urlopen(req).read().decode('utf-8')
         return json.loads(res)
     
     def get_category_id(self, category_name):
-        id = [i['id'] for i in self.categories if i['name'] == category_name][0]
-        return id
+        category_names_list = [i.get('name') for i in self.categories ]
+
+        if category_name in category_names_list:
+            id = [i['id'] for i in self.categories if i['name'] == category_name][0]
+            return id
+        else:
+            return None
 
     def get_category_ids_list(self, category_names):
         ids_list = [ self.get_category_id(i.strip()) for i in category_names.split(',') if not category_names == '']
@@ -94,9 +115,30 @@ class BackLog:
         res = urllib.request.urlopen(req).read().decode("utf-8")
         return json.loads(res)
 
+    def create_milestone(self, milestone_name):
+        api     = 'projects/{}/versions'.format(self.project_id)
+        url     = self.base_url.format(api)
+        params  = {'apiKey': self.api_key}
+        headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+        data    = 'name={}'.format(milestone_name).encode("utf-8")
+        method  = 'POST'
+
+        req = urllib.request.Request('{}?{}'.format(url, urllib.parse.urlencode(params)),
+                                             data=data,
+                                             headers=headers,
+                                             method=method
+              )
+        res = urllib.request.urlopen(req).read().decode('utf-8')
+        return json.loads(res)
+
     def get_milestone_id(self, milestone_name):
-        id = [i['id'] for i in self.milestones if i['name'] == milestone_name][0]
-        return id
+        milestone_names_list = [i.get('name') for i in self.milestones ]
+
+        if milestone_name in milestone_names_list:
+            id = [i['id'] for i in self.milestones if i['name'] == milestone_name][0]
+            return id
+        else:
+            return None
 
     def get_milestone_ids_list(self, milestone_names):
         ids_list = [ self.get_milestone_id(i.strip()) for i in milestone_names.split(',') if not milestone_names == '']

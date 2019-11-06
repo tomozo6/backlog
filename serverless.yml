@@ -43,6 +43,10 @@ functions:
     name: ${self:custom.conf.base.project}-${opt:stage}-${self:service}-lambda
     handler: main.monthlywork
     description: Managed by ServerlessFramework
+    events:
+      - schedule:
+          name: ${self:custom.conf.base.project}-${opt:stage}-${self:service}-cwe
+          rate: ${self:custom.conf.${opt:stage}.rate}
 
 resources:
   Resources:

@@ -6,4 +6,6 @@ sshd_config
 .envrc
 *.zip
 __pycache__/
-conf/*
+conf/dev.yaml
+conf/stg.yaml
+conf/prod.yaml

@@ -1,0 +1,356 @@
+{
+  "service": {
+    "service": "backlog",
+    "serviceObject": {
+      "name": "backlog"
+    },
+    "provider": {
+      "stage": null,
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._@'\",\\-\\/\\(\\)*?]+?)}",
+      "name": "aws",
+      "region": "ap-northeast-1",
+      "memorySize": 128,
+      "timeout": 300,
+      "runtime": "python3.7",
+      "versionFunctions": true,
+      "logRetentionInDays": 90,
+      "deploymentBucket": "tomozo-base-sls-s3",
+      "tags": {
+        "projecjt": "tomozo",
+        "env": "prod",
+        "role": "backlog",
+        "created_by": "ServerlessFramework"
+      },
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:DescribeTable",
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": [
+            "arn:aws:dynamodb:ap-northeast-1:*:table/tomozo-prod-monthly_work-dynamodb"
+          ]
+        }
+      ],
+      "environment": {
+        "api_key": "SemXrZQygF3WDXncDGpKrK0TzX6WBTEpTpl4bVYQhmm8VIdCdgLp6a1oynC4e9aW",
+        "space_name": "i-project",
+        "project_key": "ISRE_TEAM",
+        "dynamo_tbl": "tomozo-prod-monthly_work-dynamodb"
+      },
+      "deploymentBucketObject": {
+        "name": "tomozo-base-sls-s3"
+      },
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "MonthlyworkLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/tomozo-prod-backlog-lambda",
+              "RetentionInDays": 90
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "prod",
+                        "backlog",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/tomozo-prod-backlog-lambda:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/tomozo-prod-backlog-lambda:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "backlog",
+                    "prod",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "MonthlyworkLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "tomozo-base-sls-s3",
+                "S3Key": "serverless/backlog/prod/1587971235424-2020-04-27T07:07:15.424Z/backlog.zip"
+              },
+              "FunctionName": "tomozo-prod-backlog-lambda",
+              "Handler": "main.monthlywork",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "python3.7",
+              "Timeout": 300,
+              "Description": "Managed by ServerlessFramework",
+              "Tags": [
+                {
+                  "Key": "projecjt",
+                  "Value": "tomozo"
+                },
+                {
+                  "Key": "env",
+                  "Value": "prod"
+                },
+                {
+                  "Key": "role",
+                  "Value": "backlog"
+                },
+                {
+                  "Key": "created_by",
+                  "Value": "ServerlessFramework"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "api_key": "SemXrZQygF3WDXncDGpKrK0TzX6WBTEpTpl4bVYQhmm8VIdCdgLp6a1oynC4e9aW",
+                  "space_name": "i-project",
+                  "project_key": "ISRE_TEAM",
+                  "dynamo_tbl": "tomozo-prod-monthly_work-dynamodb"
+                }
+              }
+            },
+            "DependsOn": [
+              "MonthlyworkLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "MonthlyworkLambdaVersioniMJ3Dk8rq78bxF2d62KGfQYteZfDiiaCfL2QYOZVbA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "MonthlyworkLambdaFunction"
+              },
+              "CodeSha256": "sSTz9svcL5chDkKy/SEOlf+/KR6FW0+sRCElK2CRo70=",
+              "Description": "Managed by ServerlessFramework"
+            }
+          },
+          "MonthlyworkEventsRuleSchedule1": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "ScheduleExpression": "cron(0 1 1 * ? *)",
+              "State": "ENABLED",
+              "Name": "tomozo-prod-backlog-cwe",
+              "Targets": [
+                {
+                  "Arn": {
+                    "Fn::GetAtt": [
+                      "MonthlyworkLambdaFunction",
+                      "Arn"
+                    ]
+                  },
+                  "Id": "monthlyworkSchedule"
+                }
+              ]
+            }
+          },
+          "MonthlyworkLambdaPermissionEventsRuleSchedule1": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "MonthlyworkLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "events.amazonaws.com",
+              "SourceArn": {
+                "Fn::GetAtt": [
+                  "MonthlyworkEventsRuleSchedule1",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "DynamoDbMonthlyWork": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "No",
+                  "AttributeType": "N"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "No",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "tomozo-prod-monthly_work-dynamodb"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "tomozo-base-sls-s3"
+          },
+          "MonthlyworkLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "MonthlyworkLambdaVersioniMJ3Dk8rq78bxF2d62KGfQYteZfDiiaCfL2QYOZVbA"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "conf": {
+        "base": {
+          "project": "tomozo"
+        },
+        "prod": {
+          "api_key": "SemXrZQygF3WDXncDGpKrK0TzX6WBTEpTpl4bVYQhmm8VIdCdgLp6a1oynC4e9aW",
+          "space_name": "i-project",
+          "project_key": "ISRE_TEAM",
+          "rate": "cron(0 1 1 * ? *)"
+        },
+        "dev": {
+          "api_key": "MaxCALiWI0NJJRAEa7QRsbM5v6BaQqwurL43gFPxlZwvknFNClmxUYZiM2DZKdGw",
+          "space_name": "t-sasaki",
+          "project_key": "TSASAKI",
+          "rate": "cron(0 1 1 * ? *)"
+        }
+      },
+      "dynamodb": {
+        "monthly_work": "tomozo-prod-monthly_work-dynamodb"
+      }
+    },
+    "pluginsData": {},
+    "functions": {
+      "monthlywork": {
+        "name": "tomozo-prod-backlog-lambda",
+        "handler": "main.monthlywork",
+        "description": "Managed by ServerlessFramework",
+        "events": [
+          {
+            "schedule": {
+              "name": "tomozo-prod-backlog-cwe",
+              "rate": "cron(0 1 1 * ? *)"
+            }
+          }
+        ],
+        "package": {},
+        "memory": 128,
+        "timeout": 300,
+        "runtime": "python3.7",
+        "vpc": {}
+      }
+    },
+    "resources": {
+      "Resources": {
+        "DynamoDbMonthlyWork": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "No",
+                "AttributeType": "N"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "No",
+                "KeyType": "HASH"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "tomozo-prod-monthly_work-dynamodb"
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "serviceFilename": "serverless.yml",
+    "layers": {},
+    "artifact": "/Users/tomohiro.b.sasaki/git/backlog/.serverless/backlog.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/backlog/prod/1587971235424-2020-04-27T07:07:15.424Z",
+    "artifact": "backlog.zip"
+  }
+}

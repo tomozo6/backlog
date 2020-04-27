@@ -1,0 +1,4 @@
+api_key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+space_name: sample-space
+project_key: sample-project
+rate: cron(0 1 1 * ? *)

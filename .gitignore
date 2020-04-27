@@ -9,3 +9,4 @@ __pycache__/
 conf/dev.yaml
 conf/stg.yaml
 conf/prod.yaml
+.serverless/
